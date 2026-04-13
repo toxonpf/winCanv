@@ -1,0 +1,2 @@
+[console_scripts]
+workspace-templates = workspace_templates.main:main

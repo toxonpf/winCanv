@@ -1,0 +1,21 @@
+pkgbase = workspace-templates
+	pkgdesc = KDE Plasma 6 Wayland workspace template manager
+	pkgver = 0.1.0
+	pkgrel = 1
+	arch = any
+	license = MIT
+	makedepends = python-build
+	makedepends = python-installer
+	makedepends = python-setuptools
+	makedepends = python-wheel
+	depends = python
+	depends = python-pyqt6
+	depends = python-dbus
+	depends = python-gobject
+	depends = kwin
+	depends = plasma-workspace
+	depends = qt6-base
+	optdepends = kpackage: install and manage the bundled KWin shortcut script
+	install = workspace-templates.install
+
+pkgname = workspace-templates

@@ -1,0 +1,64 @@
+{
+  "name": "Engineering Day",
+  "created_at": "2026-04-12T18:00:00+00:00",
+  "version": 1,
+  "windows": [
+    {
+      "id": "5b4d9a5d-d362-45df-90da-11a7da4f0407",
+      "app_name": "org.kde.konsole",
+      "desktop_file_name": "org.kde.konsole",
+      "resource_class": "org.kde.konsole",
+      "resource_name": "konsole",
+      "window_role": null,
+      "caption": "dev-shell",
+      "command": [
+        "/usr/bin/konsole"
+      ],
+      "command_source": "desktop",
+      "cwd": "/home/alice/src/app",
+      "geometry": {
+        "x": 32,
+        "y": 78,
+        "width": 1180,
+        "height": 840
+      },
+      "desktop": 1,
+      "output_name": "DP-1",
+      "output_geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 2560,
+        "height": 1440
+      }
+    },
+    {
+      "id": "2c84d2bf-e5ef-47c0-80db-c84bf0e5d496",
+      "app_name": "firefox",
+      "desktop_file_name": "firefox",
+      "resource_class": "firefox",
+      "resource_name": "Navigator",
+      "window_role": null,
+      "caption": "Code Review",
+      "command": [
+        "/usr/bin/firefox",
+        "--new-window"
+      ],
+      "command_source": "procfs",
+      "cwd": "/home/alice",
+      "geometry": {
+        "x": 1260,
+        "y": 78,
+        "width": 1260,
+        "height": 840
+      },
+      "desktop": 1,
+      "output_name": "DP-1",
+      "output_geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 2560,
+        "height": 1440
+      }
+    }
+  ]
+}
