@@ -84,6 +84,14 @@ sudo pacman -U workspace-templates-0.1.0-1-x86_64.pkg.tar.zst
 For AUR publishing, the repository includes `PKGBUILD`, `.SRCINFO`, and `workspace-templates.install`.
 For `yay`, you still need to publish this package recipe to AUR. For direct local installation, `pacman -U` works right away after `makepkg`.
 
+## Build From Source
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
 Optional autostart:
 
 ```bash

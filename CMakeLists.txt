@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui DBus Network)
 
 qt_standard_project_setup()
+include(CTest)
 
 qt_add_executable(workspace-templates
     src/main.cpp
@@ -38,3 +39,9 @@ install(FILES workspace_templates/assets/io.github.toxonpf.workspacetemplates.de
 install(DIRECTORY workspace_templates/assets/kwin-shortcut/
     DESTINATION share/kwin/scripts/workspacetemplates-shortcut
 )
+
+if(BUILD_TESTING)
+    add_test(NAME workspace-templates-help COMMAND workspace-templates --help)
+    add_test(NAME workspace-templates-version COMMAND workspace-templates --version)
+    add_test(NAME workspace-templates-list COMMAND workspace-templates list)
+endif()

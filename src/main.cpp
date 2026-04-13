@@ -7,6 +7,7 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTextStream>
+#include <exception>
 
 namespace {
 void configureApplicationMetadata()
@@ -113,29 +114,34 @@ int runCli(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    const QString commandHint = firstPositionalArgument(argc, argv);
-    const bool standalone = hasArgument(argc, argv, QStringLiteral("--standalone"));
-    const bool helpRequested = hasArgument(argc, argv, QStringLiteral("--help")) || hasArgument(argc, argv, QStringLiteral("-h"));
-    const bool versionRequested = hasArgument(argc, argv, QStringLiteral("--version")) || hasArgument(argc, argv, QStringLiteral("-v"));
+    try {
+        const QString commandHint = firstPositionalArgument(argc, argv);
+        const bool standalone = hasArgument(argc, argv, QStringLiteral("--standalone"));
+        const bool helpRequested = hasArgument(argc, argv, QStringLiteral("--help")) || hasArgument(argc, argv, QStringLiteral("-h"));
+        const bool versionRequested = hasArgument(argc, argv, QStringLiteral("--version")) || hasArgument(argc, argv, QStringLiteral("-v"));
 
-    if (helpRequested || versionRequested || (!standalone && !commandHint.isEmpty() && commandHint != QStringLiteral("toggle-panel"))) {
-        return runCli(argc, argv);
-    }
+        if (helpRequested || versionRequested || (!standalone && !commandHint.isEmpty() && commandHint != QStringLiteral("toggle-panel"))) {
+            return runCli(argc, argv);
+        }
 
-    QApplication app(argc, argv);
-    configureApplicationMetadata();
+        QApplication app(argc, argv);
+        configureApplicationMetadata();
 
-    if (standalone) {
-        return runStandalone(app);
-    }
-    if (commandHint == QStringLiteral("toggle-panel")) {
-        if (sendPanelCommand(QStringLiteral("toggle"))) {
+        if (standalone) {
+            return runStandalone(app);
+        }
+        if (commandHint == QStringLiteral("toggle-panel")) {
+            if (sendPanelCommand(QStringLiteral("toggle"))) {
+                return 0;
+            }
+            return runPanelHost(app, true);
+        }
+        if (sendPanelCommand(QStringLiteral("show"))) {
             return 0;
         }
-        return runPanelHost(app, true);
+        return runPanelHost(app, false);
+    } catch (const std::exception &exc) {
+        QTextStream(stderr) << exc.what() << "\n";
+        return 1;
     }
-    if (sendPanelCommand(QStringLiteral("show"))) {
-        return 0;
-    }
-    return runPanelHost(app, false);
 }
