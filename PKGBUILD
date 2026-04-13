@@ -4,23 +4,16 @@ pkgname=workspace-templates
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="KDE Plasma 6 Wayland workspace template manager"
-arch=('any')
+arch=('x86_64')
 url=""
 license=('MIT')
 depends=(
-  'python'
-  'python-pyqt6'
-  'python-dbus'
-  'python-gobject'
+  'qt6-base'
   'kwin'
   'plasma-workspace'
-  'qt6-base'
 )
 makedepends=(
-  'python-build'
-  'python-installer'
-  'python-setuptools'
-  'python-wheel'
+  'cmake'
 )
 optdepends=(
   'kpackage: install and manage the bundled KWin shortcut script'
@@ -36,27 +29,18 @@ prepare() {
     "$srcdir/$pkgname-$pkgver/dist" \
     "$srcdir/$pkgname-$pkgver/.venv" \
     "$srcdir/$pkgname-$pkgver"/workspace_templates.egg-info \
-    "$srcdir/$pkgname-$pkgver"/.pytest_cache \
-    "$srcdir/$pkgname-$pkgver"/__pycache__ \
-    "$srcdir/$pkgname-$pkgver"/workspace_templates/__pycache__ \
-    "$srcdir/$pkgname-$pkgver"/tests/__pycache__
+    "$srcdir/$pkgname-$pkgver"/.pytest_cache
 }
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
-  python -m build --wheel --no-isolation
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
 }
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  python -m installer --destdir="$pkgdir" dist/*.whl
-
+  DESTDIR="$pkgdir" cmake --install build
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
-  install -Dm644 workspace_templates/assets/io.github.toxonpf.workspacetemplates.desktop \
-    "$pkgdir/usr/share/applications/io.github.toxonpf.workspacetemplates.desktop"
-
-  mkdir -p "$pkgdir/usr/share/kwin/scripts/workspacetemplates-shortcut"
-  cp -r workspace_templates/assets/kwin-shortcut/. \
-    "$pkgdir/usr/share/kwin/scripts/workspacetemplates-shortcut/"
 }

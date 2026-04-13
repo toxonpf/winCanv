@@ -2,7 +2,7 @@
 
 `workspace-templates` is a KDE Plasma 6 / Wayland desktop utility for saving and restoring workspace layouts.
 
-It uses short-lived KWin JavaScript scripts loaded over D-Bus, so window discovery and window placement are performed by the compositor instead of X11-era tools such as `xdotool` or `wmctrl`.
+The current app is implemented in Qt 6 / C++ and uses short-lived KWin JavaScript scripts loaded over D-Bus, so window discovery and window placement are performed by the compositor instead of X11-era tools such as `xdotool` or `wmctrl`.
 
 ## Features
 
@@ -11,55 +11,60 @@ It uses short-lived KWin JavaScript scripts loaded over D-Bus, so window discove
 - Optional "close everything first" restore mode
 - Detect already-running apps and avoid unnecessary duplicates
 - Delay-aware window placement after app launch
-- System tray popup for fast access
+- System tray drawer for fast access
 - Left-side drawer panel with slide-in animation
 - CLI for automation and hotkeys
 - Wayland-native KDE integration through `org.kde.KWin`
 
 ## Architecture
 
-The app is split into three layers:
+The C++ app is split into a few focused modules:
 
-1. `workspace_templates/manager.py`
+1. `src/main.cpp`
+   - Splits CLI mode from tray/UI mode.
+   - Keeps lightweight commands such as `list` and `--help` independent from the GUI stack.
+
+2. `src/workspace_manager.cpp`
    - Orchestrates save, load, duplicate avoidance, and launch flow.
-   - Builds restore plans from saved templates plus the current KWin snapshot.
+   - Lazily initializes the KWin bridge only when a compositor operation is actually needed.
 
-2. `workspace_templates/kwin_controller.py`
+3. `src/kwin_controller.cpp`
    - Loads short-lived KWin JavaScript files through `org.kde.KWin` `/Scripting`.
    - Uses KWin's scripting API to inspect windows, close windows, and apply `frameGeometry`.
-   - Sends results back to Python through a small per-process D-Bus bridge.
+   - Sends results back through a small per-process D-Bus bridge.
 
-3. `workspace_templates/ui.py`
-   - Creates a tray icon and a fast popup window.
-   - Keeps slow save/load work off the UI thread.
+4. `src/workspace_panel.cpp`
+   - Implements the tray-hosted drawer UI.
+   - Keeps long save/load work off the UI thread and accepts toggle commands over a local Qt socket.
 
 Why this design works well on Plasma 6 / Wayland:
 
 - Capture is compositor-native: the KWin script reads managed windows from `workspace.stackingOrder`.
 - Restore is compositor-native: the KWin script reassigns desktops and writes `frameGeometry`.
 - No X11 compatibility shims are used.
-- The Python side stays small, readable, and testable.
+- The non-KWin parts stay local, testable, and cheap to start.
 
 ## Project Structure
 
 ```text
-workspace_templates/
-├── __init__.py
-├── assets/
-│   └── io.github.toxonpf.workspacetemplates.desktop
-├── config.py
-├── dbus_bridge.py
-├── desktop_entries.py
-├── kwin_controller.py
-├── launcher.py
-├── main.py
-├── manager.py
-├── models.py
-├── template_store.py
-└── ui.py
+src/
+├── app_paths.cpp
+├── control_service.cpp
+├── desktop_entries.cpp
+├── kwin_controller.cpp
+├── main.cpp
+├── models.cpp
+├── template_store.cpp
+├── workspace_manager.cpp
+└── workspace_panel.cpp
+workspace_templates/assets/
+├── io.github.toxonpf.workspacetemplates.desktop
+└── kwin-shortcut/
 examples/
 └── engineering-day.json
 ```
+
+The old Python sources are still in the repository as a migration reference, but the build and package entrypoints now target the Qt/C++ application.
 
 ## Install On Arch / CachyOS
 
@@ -73,10 +78,10 @@ Or build it and install the resulting package with `pacman`:
 
 ```bash
 makepkg
-sudo pacman -U workspace-templates-0.1.0-1-any.pkg.tar.zst
+sudo pacman -U workspace-templates-0.1.0-1-x86_64.pkg.tar.zst
 ```
 
-For AUR publishing, the repository now includes `PKGBUILD`, `.SRCINFO`, and `workspace-templates.install`.
+For AUR publishing, the repository includes `PKGBUILD`, `.SRCINFO`, and `workspace-templates.install`.
 For `yay`, you still need to publish this package recipe to AUR. For direct local installation, `pacman -U` works right away after `makepkg`.
 
 Optional autostart:
